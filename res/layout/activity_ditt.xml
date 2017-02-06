@@ -1,14 +1,15 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/ditt_mainframe"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="io.ditt.DittActivity"
-    tools:ignore="MergeRootFrame">
- <fragment 
-       android:id="@+id/ditt_main"
-       android:name="io.ditt.DittFragment"
-       android:layout_weight="1"
-       android:layout_width="wrap_content"
-       android:layout_height="match_parent" />
+      xmlns:tools="http://schemas.android.com/tools"
+      android:id="@+id/ditt_mainframe"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      tools:context="io.ditt.DittActivity"
+      tools:ignore="MergeRootFrame">
+   <ListView
+         android:id="@+id/ditt_list"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         android:layout_weight="1"
+         android:background="#222222"
+         android:drawSelectorOnTop="false"/>
 </FrameLayout>

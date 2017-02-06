@@ -3,51 +3,76 @@ package io.ditt;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
-import android.app.ListActivity;
-import android.widget.ListAdapter;
-import android.widget.CursorAdapter;
-import android.widget.SimpleCursorAdapter;
-import android.database.MatrixCursor;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import java.util.HashMap;
+import android.content.Context;
 
-public class DittActivity extends ListActivity {
-    /** Called when the activity is first created. */
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        System.out.println("Launching DittActivity...");
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ditt);
+public class DittActivity extends Activity {
+   /** Called when the activity is first created. */
+   @Override
+   public void onCreate(Bundle savedInstanceState) {
+      System.out.println("Launching DittActivity...");
+      super.onCreate(savedInstanceState);
+      setContentView(R.layout.activity_ditt);
 
-        // Create a cursor to supply information..
-        String[] dataColumnNames = new String[] {"_id", "Task description", "Status" };
-        MatrixCursor dataCursor = new MatrixCursor(dataColumnNames);
-        dataCursor.addRow(new Object[] {"1", "Unboxing SKU#13", TaskStatus.Incomplete});
-        dataCursor.addRow(new Object[] {"2", "Powering up SKU#13", TaskStatus.Incomplete});
+      final ListView dittTaskList = (ListView)findViewById(R.id.ditt_list);
+      fetchAndPopulateTasksInList(dittTaskList);
+   }
 
-        ListAdapter dittTasks = new SimpleCursorAdapter(
-              this,  // context
-              R.layout.ditt_task, // Row template...
-              //android.R.layout.simple_list_item_1,
-              dataCursor,
-              new String[] {dataColumnNames[1], dataColumnNames[2]},
-              new int[]{R.id.ditt_id, R.id.ditt_name},
-              CursorAdapter.FLAG_AUTO_REQUERY);
+   private void fetchAndPopulateTasksInList(ListView taskList) {
+      DittTask[] tasks = fetchTasks();
 
-        setListAdapter(dittTasks);
-    }
+      // Create an adapter to supply the data to the list view...
+      final DittArrayAdapter dittDisplayAdapter = new DittArrayAdapter(this, R.layout.ditt_task, R.id.ditt_name, tasks);
 
-    public static class DittTask {
-       public final String id;
-       public final String taskName;
-       public final TaskStatus taskStatus;
+      taskList.setAdapter(dittDisplayAdapter);
+   }
 
-       public DittTask(String id, String taskName, TaskStatus taskStatus) {
-          this.id = id;
-          this.taskName = taskName;
-          this.taskStatus = taskStatus;
-       }
-    }
+   private DittTask[] fetchTasks() {
+      DittTask[] taskList = new DittTask[] {
+         new DittTask("1", "Unboxing SKU #113", TaskStatus.Incomplete),
+             new DittTask("2", "Powering up SKU #113", TaskStatus.Incomplete),
+      };
 
-    public enum TaskStatus {
-       Complete, Incomplete;
-    }
+      return taskList;
+   }
+
+   private class DittArrayAdapter extends ArrayAdapter<DittTask> {
+      HashMap<DittTask, Integer> mIdMap = new HashMap<DittTask, Integer>();
+
+      public DittArrayAdapter(Context context, int resource, int textViewResourceId, DittTask[] objects) {
+         super(context, resource, textViewResourceId, objects);
+         for(int i = 0; i < objects.length; i++) {
+            mIdMap.put(objects[i], i);
+         }
+      }
+
+      @Override
+      public long getItemId(int position) {
+         DittTask item = getItem(position);
+         return mIdMap.get(item);
+      }
+
+      @Override
+      public boolean hasStableIds() {
+         return true;
+      }
+   }
+
+   public static class DittTask {
+      public final String id;
+      public final String taskName;
+      public final TaskStatus taskStatus;
+
+      public DittTask(String id, String taskName, TaskStatus taskStatus) {
+         this.id = id;
+         this.taskName = taskName;
+         this.taskStatus = taskStatus;
+      }
+   }
+
+   public enum TaskStatus {
+      Complete, Incomplete;
+   }
 }
