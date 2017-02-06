@@ -1,0 +1,33 @@
+<RelativeLayout 
+      xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:tools="http://schemas/android.com/tools"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
+   <TextView
+         android:id="@+id/ditt_id"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:maxLength="3"
+         android:paddingLeft="10dp"/>
+   <TextView
+         android:id="@+id/ditt_name"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:maxLength="30"
+         android:layout_toRightOf="@id/ditt_id"
+         android:paddingLeft="10dp"/>
+   <Button
+         android:id="@+id/stop"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_toRightOf="@id/ditt_name"
+         android:text="S"
+         android:visible="false"/>
+   <Button
+         android:id="@+id/play"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_toRightOf="@id/ditt_name"
+         android:text="P"
+         android:visible="false"/>
+</RelativeLayout>
