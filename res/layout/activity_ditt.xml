@@ -1,15 +1,48 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:tools="http://schemas.android.com/tools"
       android:id="@+id/ditt_mainframe"
       android:layout_width="match_parent"
-      android:layout_height="match_parent"
+      android:layout_height="fill_parent"
+      android:background="#F3F3F3"
       tools:context="io.ditt.DittActivity"
       tools:ignore="MergeRootFrame">
+
+   <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+         xmlns:tools="http://schemas.android.com/tools"
+         android:id="@+id/ditt_headerframe"
+         android:layout_width="match_parent"
+         android:layout_height="30dp"
+         android:background="#999900"
+         tools:context="io.ditt.DittActivity"
+         tools:ignore="MergeRootFrame">
+
+      <TextView
+            android:id="@+id/header"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:text="@string/header_name"
+            android:gravity="center_vertical"
+            android:textSize="16dp"
+            android:textStyle="bold"
+            android:textColor="#111111"
+            android:layout_marginLeft="12dp"
+            android:layout_marginBottom="4dp"
+            android:layout_alignParentBottom="true"/>
+      <!-- divider -->
+      <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="1dp"
+            android:layout_alignParentBottom="true"
+            android:background="#DADADC"/>
+   </RelativeLayout>
    <ListView
          android:id="@+id/ditt_list"
          android:layout_width="match_parent"
          android:layout_height="match_parent"
          android:layout_weight="1"
          android:background="#222222"
-         android:drawSelectorOnTop="false"/>
-</FrameLayout>
+         android:layout_below="@id/ditt_headerframe"
+         android:choiceMode="singleChoice"
+         android:layout_alignParentBottom="true"/>
+</RelativeLayout>
