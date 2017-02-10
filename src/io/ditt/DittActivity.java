@@ -8,11 +8,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.MediaController;
 import android.widget.TextView;
+import android.widget.VideoView;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Random;
 
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -21,11 +21,11 @@ import android.content.CursorLoader;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.database.Cursor;
+import android.graphics.PixelFormat;
 
 import io.ditt.util.FileOp;
 
 public class DittActivity extends Activity {
-   private static Random random = new Random(System.currentTimeMillis());
    private View selectedDittTask = null;
    private final String description = "Dummy description for any activity to see if it works...";
    private final int REQUEST_VIDEO_CAPTURE = 1;
@@ -66,17 +66,59 @@ public class DittActivity extends Activity {
     * https://developer.android.com/training/camera/videobasics.html#TaskCaptureIntent
     */
    public void processAction(View actionButton) {
-      selectedDittTask = (View)actionButton.getParent();
-      Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-      try {
-         String taskId = (String)actionButton.getTag();
-         System.out.println("Extracted value [" + taskId + "] from (" + taskId + ")");
-         if(takeVideoIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
-         }
+      View topLevelListView = getTopLevelListView(actionButton);
+      setSelectedDittTask(topLevelListView);
+
+      if (isRecordButton(actionButton)) {
+         recordVideo();
+      } else {
+         playVideo(getVideoFor(getDittTaskIdFrom((Button) actionButton)));
       }
-      catch(ClassCastException cce) {
-         Log.e("tag", cce.getMessage());
+   }
+
+   private void setButtonTypeToPlayOrRecord(Button actionButton) {
+      String taskId = (String)(actionButton.getTag());
+
+      if(existsVideoRecording(taskId)) {
+         actionButton.setText("P");
+         System.out.println("Adding task id: " + taskId + " [with play]");
+      }
+      else {
+         actionButton.setText("R");
+         System.out.println("Adding task id: " + taskId + " [with record]");
+      }
+   }
+
+   private View getTopLevelListView(View recordOrPlayButton) {
+      return (View)(((View)recordOrPlayButton.getParent()).getParent());
+   }
+
+   private boolean isRecordButton(View actionButton) {
+      String buttonText = ((Button)actionButton).getText().toString();
+      return buttonText.equalsIgnoreCase("R") ? true : false;
+   }
+
+   private String getDittTaskIdFrom(Button button) {
+      return (String)button.getTag();
+   }
+
+   private String getVideoFor(String taskId) {
+      return videoStorageDirectory + taskId + ".mp4";
+   }
+
+   private void playVideo(String videoFilePath) {
+      getWindow().setFormat(PixelFormat.TRANSLUCENT);
+      VideoView videoView = new VideoView(this);
+      videoView.setMediaController(new MediaController(this));
+      videoView.setVideoURI(Uri.parse(videoFilePath));
+      videoView.requestFocus();
+      videoView.start();
+   }
+
+   private void recordVideo() {
+      Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+      if(takeVideoIntent.resolveActivity(getPackageManager()) != null) {
+         startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
       }
    }
 
@@ -85,11 +127,16 @@ public class DittActivity extends Activity {
       if(requestCode == REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
          final Uri videoUri = intent.getData();
          final String videoFilePath = getRealPathFromUri(videoUri);
-         final String taskId = (String)selectedDittTask.findViewById(R.id.action).getTag();
+         final View actionButton = selectedDittTask.findViewById(R.id.action);
+         final String taskId = (String)actionButton.getTag();
          System.out.println("Got video: " + videoFilePath + " for task [" + taskId + "]");
 
          try {
             FileOp.moveFile(videoFilePath, videoStorageDirectory, taskId + ".mp4");
+
+            System.out.println("Setting button type for action..");
+            setButtonTypeToPlayOrRecord((Button)actionButton);
+            actionButton.invalidate();
          }
          catch(IOException ioe) {
             Log.e("tag", ioe.getMessage()); 
@@ -169,12 +216,14 @@ public class DittActivity extends Activity {
          View rowView = null;
          if(index < tasks.length) {
             final DittTask task = tasks[index];
+            final String taskId = Integer.toString(task.id);
+
             rowView = inflater.inflate(R.layout.ditt_task, parent, false);
-            rowView.setTag(task.id + "");
+            rowView.setTag(taskId);
 
             TextView dittName = (TextView) rowView.findViewById(R.id.ditt_name);
             dittName.setText(task.name);
-            dittName.setTag(task.id + "");
+            dittName.setTag(taskId);
 
             TextView dittDesc = (TextView) rowView.findViewById(R.id.ditt_desc);
             dittDesc.setText(task.desc);
@@ -182,23 +231,17 @@ public class DittActivity extends Activity {
             dittDesc.setVisibility(View.GONE); // Initialize all 'descriptions' to be hidden...
 
             Button actionButton = (Button) rowView.findViewById(R.id.action);
-            actionButton.setTag(task.id + "");
-            if(existsVideoRecording(task.id)) {
-               actionButton.setText("P");
-               System.out.println("Adding task: " + task.name + " [with play]");
-            }
-            else {
-               actionButton.setText("R");
-               System.out.println("Adding task: " + task.name + " [with record]");
-            }
+            actionButton.setTag(taskId);
+            setButtonTypeToPlayOrRecord(actionButton);
          }
 
          return rowView;
       }
    }
 
-   public boolean existsVideoRecording(int taskId) {
-      return random.nextBoolean();
+   private boolean existsVideoRecording(String taskId) {
+      System.out.println("Checking if video recording exists for task [" + taskId + "]");
+      return FileOp.fileExists(videoStorageDirectory + taskId + ".mp4"); 
    }
 
    public static class DittTask {

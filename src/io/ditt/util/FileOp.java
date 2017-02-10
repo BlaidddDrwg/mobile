@@ -22,7 +22,7 @@ public class FileOp {
          if(!dir.exists()) {
             dir.mkdirs();
          }
-         
+
          in = new FileInputStream(addTerminatingPathSeparatorIfAbsent(inputPath) + inputName);
          out = new FileOutputStream(addTerminatingPathSeparatorIfAbsent(outputPath) + outputName);
 
@@ -72,5 +72,9 @@ public class FileOp {
          final String outputPath, final String outputName) throws IOException {
       copyFile(inputPath, inputName, outputPath, outputName);
       deleteFile(inputPath, inputName);
+   }
+
+   public static boolean fileExists(String filePath) {
+      return (new File(filePath)).exists();
    }
 }
