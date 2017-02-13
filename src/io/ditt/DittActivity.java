@@ -27,11 +27,10 @@ import io.ditt.util.FileOp;
 
 public class DittActivity extends Activity {
    private View selectedDittTask = null;
-   private final String description = "Dummy description for any activity to see if it works...";
+   private final String description = "Placeholder description for any activity to see if it works...";
    private final int REQUEST_VIDEO_CAPTURE = 1;
    private final String videoStorageDirectory = "/data/data/io.ditt/videos/";
 
-   /** Called when the activity is first created. */
    @Override
    public void onCreate(Bundle savedInstanceState) {
       System.out.println("Launching DittActivity...");
@@ -72,7 +71,7 @@ public class DittActivity extends Activity {
       if (isRecordButton(actionButton)) {
          recordVideo();
       } else {
-         playVideo(getVideoFor(getDittTaskIdFrom((Button) actionButton)));
+         playVideo(getDittTaskIdFrom((Button) actionButton));
       }
    }
 
@@ -106,13 +105,14 @@ public class DittActivity extends Activity {
       return videoStorageDirectory + taskId + ".mp4";
    }
 
-   private void playVideo(String videoFilePath) {
-      getWindow().setFormat(PixelFormat.TRANSLUCENT);
-      VideoView videoView = new VideoView(this);
-      videoView.setMediaController(new MediaController(this));
-      videoView.setVideoURI(Uri.parse(videoFilePath));
-      videoView.requestFocus();
-      videoView.start();
+   private void playVideo(String taskId) {
+      final String videoFilePath = getVideoFor(taskId);
+      Intent viewVideoIntent = new Intent(this, ViewVideoActivity.class);
+      viewVideoIntent.putExtra("video.file.path", videoFilePath);
+      viewVideoIntent.putExtra("video.title", "Video for ditt task [" + taskId + "]");
+      if(viewVideoIntent.resolveActivity(getPackageManager()) != null) {
+        startActivity(viewVideoIntent); 
+      }
    }
 
    private void recordVideo() {
