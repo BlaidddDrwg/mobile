@@ -1,14 +1,13 @@
 package io.ditt;
 
 import android.net.Uri;
-import android.app.ListActivity;
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -22,29 +21,23 @@ import android.database.Cursor;
 
 import io.ditt.util.FileOp;
 import io.ditt.DittTask;
-import io.ditt.util.SelectorStates;
 
-public class DittActivity extends ListActivity {
+public class DittActivity extends Activity {
    private View selectedDittTask = null;
    private final int REQUEST_VIDEO_CAPTURE = 1;
    private final String videoStorageDirectory = "/data/data/io.ditt/videos/";
-   //private DittArrayAdapter dittDisplayAdapter;
+   private DittArrayAdapter dittDisplayAdapter;
 
    @Override
    public void onCreate(Bundle savedInstanceState) {
       System.out.println("Launching DittActivity...");
       super.onCreate(savedInstanceState);
-      //setContentView(R.layout.empty_list);
       setContentView(R.layout.activity_ditt);
 
-      //dittDisplayAdapter = new DittArrayAdapter(this, DummyData.taskList);  
-      //final ListView dittTaskList = (ListView)findViewById(R.id.ditt_list);
-      //dittTaskList.setAdapter(dittDisplayAdapter);
-      MyListAdapter myListAdapter = new MyListAdapter(DummyData.taskList);
-      //MyListAdapter myListAdapter = new MyListAdapter(new DittTask[]{ });
-      setListAdapter(myListAdapter);
-
-      System.out.println("Notifying list of data change...");
+      dittDisplayAdapter = new DittArrayAdapter(this, DummyData.taskList);  
+      final ListView dittTaskList = (ListView)findViewById(R.id.ditt_list);
+      dittTaskList.setEmptyView(findViewById(R.id.empty));
+      dittTaskList.setAdapter(dittDisplayAdapter);
    }
 
    protected View getSelectedDittTask() {
@@ -53,34 +46,35 @@ public class DittActivity extends ListActivity {
 
    public void setSelectedDittTask(View newSelectedDittTask) {
       if(selectedDittTask != null) {
-         TextView oldDescView = (TextView)selectedDittTask.findViewById(R.id.ditt_desc);
-         System.out.println("Setting background for task[" + oldDescView.getTag() + "] to transparent...");
-         oldDescView.setVisibility(View.GONE);
-         oldDescView.setTextColor(getResources().getColor(R.color.unselected_list_text));
-         TextView oldTaskNameView = (TextView)selectedDittTask.findViewById(R.id.ditt_name);
-         oldTaskNameView.setTextColor(getResources().getColor(R.color.unselected_list_text));
-         selectedDittTask.setBackgroundResource(android.R.color.transparent);
+         hideAndUnhighlight(selectedDittTask);
+
       }
 
-      displayViewStructure(newSelectedDittTask, "");
-      TextView newDescView = (TextView)newSelectedDittTask.findViewById(R.id.ditt_desc);
-      newDescView.setVisibility(View.VISIBLE);
-      newDescView.animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(3000).scaleY(1f);
-      //newDescView.setHeight(dittDisplayAdapter.getHeight((Integer)newDescView.getTag()));
-      int[] drawableStates = newSelectedDittTask.getDrawableState();
-      for(int drawableState : drawableStates) {
-         System.out.println("Drawable state: " + SelectorStates.translateDrawableState(drawableState));
-      }
-
-      newSelectedDittTask.setBackgroundColor(getResources().getColor(R.color.row_selected));
-      newDescView.setTextColor(getResources().getColor(R.color.selected_list_text));
-      TextView newTaskNameView = (TextView)newSelectedDittTask.findViewById(R.id.ditt_name);
-      String defaultColor = String.format("#%06X", (0xFFFFFF & newTaskNameView.getTextColors().getDefaultColor()));
-      System.out.println("Setting background for task[" + newDescView.getTag() + "] fg was {#" + defaultColor + "}");
-      newTaskNameView.setTextColor(getResources().getColor(R.color.selected_list_text));
-
-      //newDescView.setBackgroundResource(R.color.row_selected);
+      expandAndHighlight(newSelectedDittTask);
       this.selectedDittTask = newSelectedDittTask;
+   }
+
+   private void hideAndUnhighlight(View parentView) {
+      TextView oldDescView = (TextView)parentView.findViewById(R.id.ditt_desc);
+      oldDescView.setVisibility(View.GONE);
+
+      int unhighlightedTextColor = getResources().getColor(R.color.unselected_list_text);
+      oldDescView.setTextColor(unhighlightedTextColor);
+      TextView oldTaskNameView = (TextView)parentView.findViewById(R.id.ditt_name);
+      oldTaskNameView.setTextColor(unhighlightedTextColor);
+
+      parentView.setBackgroundResource(android.R.color.transparent);
+   }      
+
+   private void expandAndHighlight(View parentView) {
+      int highlightedTextColor = getResources().getColor(R.color.selected_list_text);
+      TextView newDescView = (TextView)parentView.findViewById(R.id.ditt_desc);
+      newDescView.setTextColor(highlightedTextColor);
+      TextView newTaskNameView = (TextView)parentView.findViewById(R.id.ditt_name);
+      newTaskNameView.setTextColor(highlightedTextColor);
+
+      parentView.setBackgroundResource(R.color.row_selected);
+      newDescView.setVisibility(View.VISIBLE);
    }
 
    /* 
@@ -177,49 +171,6 @@ public class DittActivity extends ListActivity {
       return cursor.getString(columnIndex);
    }
 
-   private void displayViewStructure(View view, String prefix) {
-      for(int index = 0; index < ((ViewGroup)view).getChildCount(); index++) {
-         View nextChild = ((ViewGroup)view).getChildAt(index);
-         System.out.println("-" + nextChild.getTag());
-
-         if(nextChild instanceof ViewGroup) {
-            displayViewStructure(nextChild, prefix + " ");
-         }
-      }
-   }
-
-   private class MyListAdapter extends BaseAdapter {
-      private final DittTask[] tasks;
-
-      public MyListAdapter(DittTask[] tasks) {
-         this.tasks = tasks;
-      }
-
-      @Override
-      public int getCount() {
-         System.out.println("Returning count [" + tasks.length + "]");
-         return tasks.length;
-      }
-
-      @Override
-      public String getItem(int position) {
-         System.out.println("Returning item at position [" + position + "]: " + tasks[position].name);
-         return tasks[position].name;
-      }
-
-      @Override
-      public long getItemId(int position) {
-         System.out.println("Returning item id at position [" + position + "]: " + tasks[position].id);
-         return tasks[position].id;
-      }
-
-      @Override
-      public View getView(int position, View convertView, ViewGroup parent) {
-         System.out.println("Inflating view [" + position + "]");
-         return populateView(convertView, parent, tasks[position]);
-      }
-   }
-
    private final View populateView(View rowView, ViewGroup parent, DittTask task) {
       if(rowView == null) {
          rowView = getLayoutInflater().inflate(R.layout.ditt_task, parent, false);
@@ -265,7 +216,6 @@ public class DittActivity extends ListActivity {
       public int getCount() {
          return tasks.length;
       }
-
 
       @Override
       public boolean hasStableIds() {
