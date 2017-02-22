@@ -5,3 +5,6 @@ local.properties
 .settings/
 bin/
 gen/
+*.swp
+*.xmi
+

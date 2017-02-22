@@ -1,6 +1,5 @@
 package io.ditt;
 
-import android.app.Activity;
 import java.io.File;
 import android.util.Log;
 import android.net.Uri;

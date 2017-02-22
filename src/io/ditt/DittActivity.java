@@ -1,45 +1,50 @@
 package io.ditt;
 
 import android.net.Uri;
-import android.app.Activity;
+import android.app.ListActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
-import android.widget.ListView;
-import android.widget.MediaController;
 import android.widget.TextView;
-import android.widget.VideoView;
 
 import java.io.IOException;
 
 import android.content.Intent;
-import android.view.LayoutInflater;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.database.Cursor;
-import android.graphics.PixelFormat;
 
 import io.ditt.util.FileOp;
+import io.ditt.DittTask;
+import io.ditt.util.SelectorStates;
 
-public class DittActivity extends Activity {
+public class DittActivity extends ListActivity {
    private View selectedDittTask = null;
-   private final String description = "Placeholder description for any activity to see if it works...";
    private final int REQUEST_VIDEO_CAPTURE = 1;
    private final String videoStorageDirectory = "/data/data/io.ditt/videos/";
+   //private DittArrayAdapter dittDisplayAdapter;
 
    @Override
    public void onCreate(Bundle savedInstanceState) {
       System.out.println("Launching DittActivity...");
       super.onCreate(savedInstanceState);
+      //setContentView(R.layout.empty_list);
       setContentView(R.layout.activity_ditt);
 
-      DittArrayAdapter dittDisplayAdapter = new DittArrayAdapter(this, fetchTasks());
-      final ListView dittTaskList = (ListView)findViewById(R.id.ditt_list);
-      dittTaskList.setAdapter(dittDisplayAdapter);
+      //dittDisplayAdapter = new DittArrayAdapter(this, DummyData.taskList);  
+      //final ListView dittTaskList = (ListView)findViewById(R.id.ditt_list);
+      //dittTaskList.setAdapter(dittDisplayAdapter);
+      MyListAdapter myListAdapter = new MyListAdapter(DummyData.taskList);
+      //MyListAdapter myListAdapter = new MyListAdapter(new DittTask[]{ });
+      setListAdapter(myListAdapter);
+
+      System.out.println("Notifying list of data change...");
    }
 
    protected View getSelectedDittTask() {
@@ -49,14 +54,32 @@ public class DittActivity extends Activity {
    public void setSelectedDittTask(View newSelectedDittTask) {
       if(selectedDittTask != null) {
          TextView oldDescView = (TextView)selectedDittTask.findViewById(R.id.ditt_desc);
+         System.out.println("Setting background for task[" + oldDescView.getTag() + "] to transparent...");
          oldDescView.setVisibility(View.GONE);
+         oldDescView.setTextColor(getResources().getColor(R.color.unselected_list_text));
+         TextView oldTaskNameView = (TextView)selectedDittTask.findViewById(R.id.ditt_name);
+         oldTaskNameView.setTextColor(getResources().getColor(R.color.unselected_list_text));
+         selectedDittTask.setBackgroundResource(android.R.color.transparent);
       }
 
       displayViewStructure(newSelectedDittTask, "");
       TextView newDescView = (TextView)newSelectedDittTask.findViewById(R.id.ditt_desc);
-      System.out.println("Selected ditt task: " + newDescView.getTag());
       newDescView.setVisibility(View.VISIBLE);
+      newDescView.animate().setInterpolator(new AccelerateDecelerateInterpolator()).setDuration(3000).scaleY(1f);
+      //newDescView.setHeight(dittDisplayAdapter.getHeight((Integer)newDescView.getTag()));
+      int[] drawableStates = newSelectedDittTask.getDrawableState();
+      for(int drawableState : drawableStates) {
+         System.out.println("Drawable state: " + SelectorStates.translateDrawableState(drawableState));
+      }
 
+      newSelectedDittTask.setBackgroundColor(getResources().getColor(R.color.row_selected));
+      newDescView.setTextColor(getResources().getColor(R.color.selected_list_text));
+      TextView newTaskNameView = (TextView)newSelectedDittTask.findViewById(R.id.ditt_name);
+      String defaultColor = String.format("#%06X", (0xFFFFFF & newTaskNameView.getTextColors().getDefaultColor()));
+      System.out.println("Setting background for task[" + newDescView.getTag() + "] fg was {#" + defaultColor + "}");
+      newTaskNameView.setTextColor(getResources().getColor(R.color.selected_list_text));
+
+      //newDescView.setBackgroundResource(R.color.row_selected);
       this.selectedDittTask = newSelectedDittTask;
    }
 
@@ -111,7 +134,7 @@ public class DittActivity extends Activity {
       viewVideoIntent.putExtra("video.file.path", videoFilePath);
       viewVideoIntent.putExtra("video.title", "Video for ditt task [" + taskId + "]");
       if(viewVideoIntent.resolveActivity(getPackageManager()) != null) {
-        startActivity(viewVideoIntent); 
+         startActivity(viewVideoIntent); 
       }
    }
 
@@ -165,27 +188,60 @@ public class DittActivity extends Activity {
       }
    }
 
-   private DittTask[] fetchTasks() {
-      DittTask[] taskList = new DittTask[] {
-         new DittTask(1, "Unboxing SKU #113", "Task 1: " + description),
-             new DittTask(2,  "Powering up SKU #113", "Task 2: " + description),
-             new DittTask(3,  "Action A on SKU #113", "Task 3: " + description),
-             new DittTask(3,  "Action B on SKU #113", "Task 4: " + description),
-             new DittTask(5,  "Action C on SKU #113", "Task 5: " + description),
-             new DittTask(6,  "Action D on SKU #113", "Task 6: " + description),
-             new DittTask(7,  "Action E on SKU #113", "Task 7: " + description),
-             new DittTask(8,  "Action F on SKU #113", "Task 8: " + description),
-             new DittTask(9,  "Action G on SKU #113", "Task 9: " + description),
-             new DittTask(10, "Action H on SKU #113", "Task 10: " + description),
-             new DittTask(11, "Action I on SKU #113", "Task 11: " + description),
-             new DittTask(12, "Action J on SKU #113", "Task 12: " + description),
-             new DittTask(13, "Action K on SKU #113", "Task 13: " + description),
-             new DittTask(14, "Action L on SKU #113", "Task 14: " + description),
-             new DittTask(15, "Action M on SKU #113", "Task 15: " + description),
-             new DittTask(16, "Powering down SKU #113", "Task 16: " + description),
-      };
+   private class MyListAdapter extends BaseAdapter {
+      private final DittTask[] tasks;
 
-      return taskList;
+      public MyListAdapter(DittTask[] tasks) {
+         this.tasks = tasks;
+      }
+
+      @Override
+      public int getCount() {
+         System.out.println("Returning count [" + tasks.length + "]");
+         return tasks.length;
+      }
+
+      @Override
+      public String getItem(int position) {
+         System.out.println("Returning item at position [" + position + "]: " + tasks[position].name);
+         return tasks[position].name;
+      }
+
+      @Override
+      public long getItemId(int position) {
+         System.out.println("Returning item id at position [" + position + "]: " + tasks[position].id);
+         return tasks[position].id;
+      }
+
+      @Override
+      public View getView(int position, View convertView, ViewGroup parent) {
+         System.out.println("Inflating view [" + position + "]");
+         return populateView(convertView, parent, tasks[position]);
+      }
+   }
+
+   private final View populateView(View rowView, ViewGroup parent, DittTask task) {
+      if(rowView == null) {
+         rowView = getLayoutInflater().inflate(R.layout.ditt_task, parent, false);
+      }
+      
+      String taskId = Integer.toString(task.id);
+      rowView.setTag(taskId);
+
+      TextView dittName = (TextView) rowView.findViewById(R.id.ditt_name);
+      dittName.setText(task.name);
+      dittName.setTag(taskId);
+
+      TextView dittDesc = (TextView) rowView.findViewById(R.id.ditt_desc);
+      dittDesc.setText(task.desc);
+      dittDesc.setTag(Integer.valueOf(task.id));
+      dittDesc.setVisibility(View.GONE); // Initialize all 'descriptions' to be hidden...
+
+      Button actionButton = (Button) rowView.findViewById(R.id.action);
+      actionButton.setTag(taskId);
+      setButtonTypeToPlayOrRecord(actionButton);
+
+      return rowView;
    }
 
    private class DittArrayAdapter extends ArrayAdapter<DittTask> {
@@ -193,7 +249,8 @@ public class DittActivity extends Activity {
       private DittTask[] tasks;
 
       public DittArrayAdapter(Context context, DittTask[] objects) {
-         super(context, R.id.ditt_list, objects);
+         super(context, android.R.id.list, objects);
+         System.out.println("Creating DittArrayAdapter...");
          this.context = context;
          this.tasks = objects;
       }
@@ -205,34 +262,23 @@ public class DittActivity extends Activity {
       }
 
       @Override
+      public int getCount() {
+         return tasks.length;
+      }
+
+
+      @Override
       public boolean hasStableIds() {
          return true;
       }
 
       @Override
       public View getView(int index, View convertView, ViewGroup parent) {
-         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+         System.out.println("Laying out view index [" + index + "]");
 
          View rowView = null;
          if(index < tasks.length) {
-            final DittTask task = tasks[index];
-            final String taskId = Integer.toString(task.id);
-
-            rowView = inflater.inflate(R.layout.ditt_task, parent, false);
-            rowView.setTag(taskId);
-
-            TextView dittName = (TextView) rowView.findViewById(R.id.ditt_name);
-            dittName.setText(task.name);
-            dittName.setTag(taskId);
-
-            TextView dittDesc = (TextView) rowView.findViewById(R.id.ditt_desc);
-            dittDesc.setText(task.desc);
-            dittDesc.setTag(Integer.valueOf(task.id));
-            dittDesc.setVisibility(View.GONE); // Initialize all 'descriptions' to be hidden...
-
-            Button actionButton = (Button) rowView.findViewById(R.id.action);
-            actionButton.setTag(taskId);
-            setButtonTypeToPlayOrRecord(actionButton);
+            rowView = populateView(convertView, parent, tasks[index]);
          }
 
          return rowView;
@@ -242,21 +288,5 @@ public class DittActivity extends Activity {
    private boolean existsVideoRecording(String taskId) {
       System.out.println("Checking if video recording exists for task [" + taskId + "]");
       return FileOp.fileExists(videoStorageDirectory + taskId + ".mp4"); 
-   }
-
-   public static class DittTask {
-      public final int id;
-      public final String name;
-      public final String desc;
-
-      public DittTask(int id, String taskName, String desc) {
-         this.id = id;
-         this.name = taskName;
-         this.desc = desc;
-      }
-
-      public String toString() {
-         return name;
-      }
    }
 }

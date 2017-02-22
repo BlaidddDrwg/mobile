@@ -3,7 +3,6 @@
       android:id="@+id/ditt_mainframe"
       android:layout_width="match_parent"
       android:layout_height="fill_parent"
-      android:background="#F3F3F3"
       tools:context="io.ditt.DittActivity"
       tools:ignore="MergeRootFrame">
 
@@ -12,7 +11,8 @@
          android:id="@+id/ditt_headerframe"
          android:layout_width="match_parent"
          android:layout_height="30dp"
-         android:background="#999900"
+         android:layout_weight="1"
+         android:background="@color/header_bg"
          tools:context="io.ditt.DittActivity"
          tools:ignore="MergeRootFrame">
 
@@ -24,7 +24,7 @@
             android:gravity="center_vertical"
             android:textSize="16dp"
             android:textStyle="bold"
-            android:textColor="#111111"
+            android:textColor="@color/unselected_list_text"
             android:layout_marginLeft="12dp"
             android:layout_marginBottom="4dp"
             android:layout_alignParentBottom="true"/>
@@ -34,15 +34,30 @@
             android:layout_height="1dp"
             android:layout_marginBottom="1dp"
             android:layout_alignParentBottom="true"
-            android:background="#DADADC"/>
+            android:background="@color/header_underline"/>
    </RelativeLayout>
-   <ListView
-         android:id="@+id/ditt_list"
-         android:layout_width="match_parent"
-         android:layout_height="match_parent"
-         android:layout_weight="1"
-         android:background="#222222"
+   <!-- Learnings... -->
+   <!--
+     1. Setting either the list selector or the background here does not work. Nothing happens - can't see
+     the 'flicker' of the selection process (since different colors are set for the selection process 
+     for visibility.
+  -->
+   <FrameLayout
+         android:layout_width="fill_parent"
+         android:layout_height="fill_parent"
          android:layout_below="@id/ditt_headerframe"
-         android:choiceMode="singleChoice"
-         android:layout_alignParentBottom="true"/>
+         android:layout_alignParentBottom="true"
+         android:layout_weight="1">
+      <ListView
+            android:id="@android:id/list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:choiceMode="singleChoice"/>
+      <ViewStub
+            android:id="@android:id/empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout="@layout/empty"/>
+   </FrameLayout>
 </RelativeLayout>

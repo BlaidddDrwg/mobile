@@ -9,14 +9,16 @@
          android:layout_width="fill_parent"
          android:layout_height="fill_parent"
          android:layout_centerHorizontal="true"
+         android:background="@android:color/white"
          android:scaleType="fitCenter"
-         android:src="@drawable/ditt_logo" />
+         android:src="@drawable/ditt_logo_w" />
 
    <RelativeLayout
          xmlns:android="http://schemas.android.com/apk/res/android"
          xmlns:tools="http://schemas.android.com/tools"
          android:layout_width="match_parent"
          android:layout_height="match_parent"
+         android:alpha="0.75"
          android:layout_gravity="center_horizontal|center">
       <GridLayout
             android:id="@+id/login_grid"
@@ -42,7 +44,6 @@
                android:layout_height="wrap_content"
                android:layout_gravity="fill_horizontal"
                android:textAppearance="@android:style/TextAppearance.Small"
-               android:alpha="0.75"
                android:inputType="text" />
          <TextView
                android:id="@+id/password_prompt"
@@ -56,7 +57,6 @@
                android:layout_height="wrap_content"
                android:layout_gravity="fill_horizontal"
                android:textAppearance="@android:style/TextAppearance.Small"
-               android:alpha="0.75"
                android:inputType="textPassword" />
       </GridLayout>
    </RelativeLayout>
@@ -68,11 +68,11 @@
          android:layout_below="@id/login_grid"
          android:layout_gravity="center_horizontal|bottom"
          android:paddingLeft="50dp"
-         android:paddingTop="10dp"
+         android:paddingTop="5dp"
          android:paddingRight="50dp"
-         android:paddingBottom="10dp"
+         android:paddingBottom="5dp"
+         android:layout_marginBottom="10dp"
          android:background="@drawable/ditt_button"
-         android:textColor="@android:color/white"
-         android:alpha="0.85"
+         android:textColor="@android:color/black"
          android:onClick="tryLogin"/>
 </FrameLayout>

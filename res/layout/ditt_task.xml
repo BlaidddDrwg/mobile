@@ -8,20 +8,20 @@
       android:longClickable="false"
       android:stackFromBottom="true"
       android:choiceMode="singleChoice">
+   <!--android:background="@drawable/listselector"-->
+   <!-- Setting the background works (see color flicker on selection), but not 'listSelector' -->
    <LinearLayout 
          xmlns:android="http://schemas.android.com/apk/res/android"
          xmlns:tools="http://schemas.android.com/tools"
          android:orientation="horizontal"
          android:layout_width="match_parent"
-         android:layout_height="match_parent"
-         android:background="@drawable/listselector">
+         android:layout_height="match_parent">
       <TextView
             android:id="@+id/ditt_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="left"
             android:layout_weight="1"
-            android:textColor="@color/list_text"
             android:maxLength="30"
             android:paddingLeft="10dp"/>
       <Button
@@ -30,7 +30,7 @@
             android:layout_height="32dp"
             android:background="@drawable/rounded_rect"
             android:gravity="center"
-            android:textColor="#FFFFFF"
+            android:textColor="@android:color/white"
             android:onClick="processAction"
             android:textSize="12sp"
             android:textStyle="bold"
@@ -40,6 +40,7 @@
          android:id="@+id/ditt_desc"
          android:layout_width="match_parent"
          android:layout_height="wrap_content"
+         android:textAppearance="@android:style/TextAppearance.Small"
          android:gravity="left"
          android:paddingLeft="10dp"/>
 </LinearLayout>
