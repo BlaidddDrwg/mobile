@@ -28,7 +28,7 @@
             android:id="@+id/action"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:background="@drawable/rounded_rect"
+            android:background="@drawable/ditt_button_round"
             android:gravity="center"
             android:textColor="@android:color/white"
             android:onClick="processAction"

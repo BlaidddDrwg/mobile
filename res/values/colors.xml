@@ -10,4 +10,7 @@
    <color name="header_bg">#999900</color>
    <color name="header_underline">#DADADC</color>
    <color name="unselected_list_text">#BEBEBE</color>
+   <color name="button_border">#333333</color>
+   <color name="button_fill">#666666</color>
+   <color name="button_fill_pressed">#999999</color>
 </resources>
