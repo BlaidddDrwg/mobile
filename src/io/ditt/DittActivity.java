@@ -88,19 +88,21 @@ public class DittActivity extends Activity {
       if (isRecordButton(actionButton)) {
          recordVideo();
       } else {
-         playVideo(getDittTaskIdFrom((Button) actionButton));
+         playVideo(getDittTaskIdFrom(actionButton));
       }
    }
 
-   private void setButtonTypeToPlayOrRecord(Button actionButton) {
+   private void setButtonTypeToPlayOrRecord(View actionButton) {
       String taskId = (String)(actionButton.getTag());
 
       if(existsVideoRecording(taskId)) {
-         actionButton.setText("P");
+         actionButton.setTag(R.id.action_type, "P");
+         actionButton.setBackgroundResource(R.drawable.play2);
          System.out.println("Adding task id: " + taskId + " [with play]");
       }
       else {
-         actionButton.setText("R");
+         actionButton.setTag(R.id.action_type, "R");
+         actionButton.setBackgroundResource(R.drawable.record4);
          System.out.println("Adding task id: " + taskId + " [with record]");
       }
    }
@@ -110,12 +112,12 @@ public class DittActivity extends Activity {
    }
 
    private boolean isRecordButton(View actionButton) {
-      String buttonText = ((Button)actionButton).getText().toString();
-      return buttonText.equalsIgnoreCase("R") ? true : false;
+      String actionTag = actionButton.getTag(R.id.action_type).toString();
+      return actionTag.equalsIgnoreCase("R") ? true : false;
    }
 
-   private String getDittTaskIdFrom(Button button) {
-      return (String)button.getTag();
+   private String getDittTaskIdFrom(View view) {
+      return (String)view.getTag();
    }
 
    private String getVideoFor(String taskId) {
@@ -152,7 +154,7 @@ public class DittActivity extends Activity {
             FileOp.moveFile(videoFilePath, videoStorageDirectory, taskId + ".mp4");
 
             System.out.println("Setting button type for action..");
-            setButtonTypeToPlayOrRecord((Button)actionButton);
+            setButtonTypeToPlayOrRecord(actionButton);
             actionButton.invalidate();
          }
          catch(IOException ioe) {
@@ -188,7 +190,7 @@ public class DittActivity extends Activity {
       dittDesc.setTag(Integer.valueOf(task.id));
       dittDesc.setVisibility(View.GONE); // Initialize all 'descriptions' to be hidden...
 
-      Button actionButton = (Button) rowView.findViewById(R.id.action);
+      View actionButton = rowView.findViewById(R.id.action);
       actionButton.setTag(taskId);
       setButtonTypeToPlayOrRecord(actionButton);
 

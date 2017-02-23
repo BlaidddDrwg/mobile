@@ -24,7 +24,7 @@
             android:layout_weight="1"
             android:maxLength="30"
             android:paddingLeft="10dp"/>
-      <Button
+      <ImageButton
             android:id="@+id/action"
             android:layout_width="32dp"
             android:layout_height="32dp"
